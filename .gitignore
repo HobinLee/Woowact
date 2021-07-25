@@ -1,0 +1,22 @@
+# Logs
+.DS_STORE
+
+#build
+dist/
+
+# dotenv environment variables file
+.env
+.env.test
+
+# Dependency directories
+node_modules/
+sessions/
+
+# sass
+.sass-cache/
+*.css.map
+*.sass.map
+*.scss.map
+
+#etc
+.vscode
