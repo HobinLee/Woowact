@@ -25,7 +25,7 @@ export default class Component<
 
   static ID: number = 0;
 
-  private $components: {
+  protected $components: {
     [key: string]: Component;
   } = {};
 
@@ -58,17 +58,15 @@ export default class Component<
     }
   }
 
+  protected componentDidUpdate() {}
   protected componentDidMount() {}
 
-  protected addComponent<PT = PropsType>(
-    component: any,
-    props: PT,
-  ): ComponentId {
-    const newComponent = new component(props);
+  protected addComponent<PT = PropsType>(component: any, props: PT): Component {
+    const newComponent: Component = new component(props);
 
     this.$components[newComponent.id] = newComponent;
 
-    return newComponent.id;
+    return newComponent;
   }
 
   protected render(): string {
@@ -88,6 +86,7 @@ export default class Component<
       }
 
       this.$element = Diff.reconciliation(this.$element, $new);
+      this.componentDidUpdate();
     } catch (e) {
       console.error(e);
     }
@@ -101,5 +100,9 @@ export default class Component<
     this.state = { ...this.state, ...newState };
 
     this.update();
+  }
+
+  protected static _($component: Component): string {
+    return `<${$component.id}></${$component.id}>`;
   }
 }
