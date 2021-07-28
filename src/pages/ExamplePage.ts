@@ -9,7 +9,7 @@ export default class ExamplePage extends Component<{}, ExamplePageState> {
     super({});
 
     this.state = {
-      count: 0,
+      count: 2,
     };
 
     this.init();
@@ -32,6 +32,10 @@ export default class ExamplePage extends Component<{}, ExamplePageState> {
     );
   }
   render(): string {
-    return `<div>${this.state.count}</div>`;
+    return `
+      <div id='id${this.state.count}' class='class1 class2'>
+        ${this.state.count}
+      </div>
+    `;
   }
 }
