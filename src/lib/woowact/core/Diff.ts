@@ -35,6 +35,33 @@ const replaceAttributes = ($origin: HTMLElement, $new: HTMLElement): void => {
   }
 };
 
+const replaceChildren = ($origin: HTMLElement, $new: HTMLElement): void => {
+  const $originChildren = Array.from($origin.children);
+  const $newChildren = Array.from($new.children);
+
+  const max = Math.max($originChildren.length, $newChildren.length);
+
+  for (let i = 0; i < max; i++) {
+    const $originChild = $originChildren[i] as HTMLElement;
+    const $newChild = $newChildren[i] as HTMLElement;
+
+    if ($originChild && !$newChild) {
+      $originChild.remove();
+      continue;
+    }
+
+    if (!$originChild && $newChild) {
+      $origin.appendChild($newChild);
+      continue;
+    }
+
+    reconciliation(
+      $originChildren[i] as HTMLElement,
+      $newChildren[i] as HTMLElement,
+    );
+  }
+};
+
 /**
  * reference - https://ko.reactjs.org/docs/reconciliation.html
  *
@@ -67,28 +94,7 @@ const reconciliation = (
    */
   replaceAttributes($origin, $new);
 
-  const $oldChildren = Array.from($origin.children);
-  const $newChildren = Array.from($new.children);
-
-  const max = Math.max($oldChildren.length, $newChildren.length);
-
-  for (let i = 0; i < max; i++) {
-    const realNode = $oldChildren[i] as HTMLElement;
-    const virtualNode = $newChildren[i] as HTMLElement;
-
-    if (realNode && !virtualNode) {
-      realNode.remove();
-
-      continue;
-    }
-
-    if (!realNode && virtualNode) {
-      $origin.appendChild(virtualNode);
-      continue;
-    }
-
-    reconciliation(realNode, virtualNode);
-  }
+  replaceChildren($origin, $new);
 
   return $origin;
 };
