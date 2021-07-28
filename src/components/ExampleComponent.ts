@@ -11,7 +11,9 @@ export default class ExampleComponent extends Component<ExampleComponentProps> {
     this.init();
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    this.$element.addEventListener('click', () => alert(this.props.count));
+  }
 
   render() {
     return `

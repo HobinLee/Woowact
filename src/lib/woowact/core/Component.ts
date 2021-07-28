@@ -21,7 +21,7 @@ export default class Component<
   state: S;
 
   public id: ComponentId = TAG + Component.ID;
-  private $element: HTMLElement | null = null;
+  private _$element: HTMLElement | null = null;
 
   static ID: number = 0;
 
@@ -37,19 +37,19 @@ export default class Component<
 
   // this should be called in constructor of 'Child Class Component'
   protected init() {
-    this.$element = parseJSX(this.render(), this.$components);
+    this._$element = parseJSX(this.render(), this.$components);
     this.componentDidMount();
   }
 
-  public getElement(): HTMLElement {
+  get $element(): HTMLElement {
     try {
-      if (this.$element === null) {
+      if (this._$element === null) {
         throw new Error(
           `component doesn't have element. please call init() in its constructor.`,
         );
       }
 
-      return this.$element;
+      return this._$element;
     } catch (e) {
       console.error(e.message);
 
@@ -77,15 +77,15 @@ export default class Component<
     try {
       const $new = parseJSX(this.render(), this.$components);
 
-      if (this.$element === null) {
-        this.$element = $new;
+      if (this._$element === null) {
+        this._$element = $new;
 
         throw new Error(
           `component doesn't have element. please call init() in its constructor.`,
         );
       }
 
-      this.$element = Diff.reconciliation(this.$element, $new);
+      this._$element = Diff.reconciliation(this.$element, $new);
       this.componentDidUpdate();
     } catch (e) {
       console.error(e);
