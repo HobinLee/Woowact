@@ -1,3 +1,4 @@
+import { checkSame } from '../../../utils/json';
 import Diff from './Diff';
 import { parseJSX } from './myJSX';
 
@@ -6,10 +7,6 @@ export interface StateType {}
 
 type Partial<T> = {
   [P in keyof T]?: T[P];
-};
-
-const checkSameState = (prevState: {}, nextState: {}): boolean => {
-  return JSON.stringify(prevState) === JSON.stringify(toString);
 };
 
 export type ComponentId = string;
@@ -99,7 +96,7 @@ export default class Component<
   protected setState(newState: Partial<S>) {
     const nextState = { ...this.state, ...newState };
 
-    if (checkSameState(this.state, nextState)) return;
+    if (checkSame(this.state, nextState)) return;
 
     this.state = { ...this.state, ...newState };
 
