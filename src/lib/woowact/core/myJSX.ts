@@ -10,7 +10,7 @@ const replaceComponent = (
   const nodeName = $current.nodeName;
 
   if (components[nodeName]) {
-    const $new = components[nodeName].getElement();
+    const $new = components[nodeName].$element;
 
     if ($new) {
       $parent.replaceChild($new, $current);
