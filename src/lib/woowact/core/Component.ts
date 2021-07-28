@@ -9,7 +9,7 @@ type Partial<T> = {
 };
 
 const checkSameState = (prevState: {}, nextState: {}): boolean => {
-  return JSON.stringify(prevState) === JSON.stringify(nextState);
+  return JSON.stringify(prevState) === JSON.stringify(toString);
 };
 
 export type ComponentId = string;
@@ -79,10 +79,21 @@ export default class Component<
   }
 
   private update(): void {
-    this.$element = Diff.reconciliation(
-      this.$element,
-      parseJSX(this.render(), this.$components),
-    );
+    try {
+      const $new = parseJSX(this.render(), this.$components);
+
+      if (this.$element === null) {
+        this.$element = $new;
+
+        throw new Error(
+          `component doesn't have element. please call init() in its constructor.`,
+        );
+      }
+
+      this.$element = Diff.reconciliation(this.$element, $new);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   protected setState(newState: Partial<S>) {
