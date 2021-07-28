@@ -1,6 +1,7 @@
 import { checkSame } from '../../../utils/json';
 import Diff from './Diff';
 import { parseJSX } from './myJSX';
+import { Store } from './Store';
 
 export interface PropsType {}
 export interface StateType {}
@@ -98,6 +99,14 @@ export default class Component<
     if (checkSame(this.state, nextState)) return;
 
     this.state = { ...this.state, ...newState };
+
+    this.update();
+  }
+
+  public updateBy(partialState?: Partial<S>) {
+    if (partialState) {
+      this.setState(partialState);
+    }
 
     this.update();
   }
