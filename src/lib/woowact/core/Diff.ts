@@ -67,7 +67,30 @@ const reconciliation = (
    */
   replaceAttributes($origin, $new);
 
-  return $new;
+  const $oldChildren = Array.from($origin.children);
+  const $newChildren = Array.from($new.children);
+
+  const max = Math.max($oldChildren.length, $newChildren.length);
+
+  for (let i = 0; i < max; i++) {
+    const realNode = $oldChildren[i] as HTMLElement;
+    const virtualNode = $newChildren[i] as HTMLElement;
+
+    if (realNode && !virtualNode) {
+      realNode.remove();
+
+      continue;
+    }
+
+    if (!realNode && virtualNode) {
+      $origin.appendChild(virtualNode);
+      continue;
+    }
+
+    reconciliation(realNode, virtualNode);
+  }
+
+  return $origin;
 };
 
 export default { reconciliation };
