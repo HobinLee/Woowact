@@ -1,5 +1,6 @@
 import ExampleComponent from '../components/ExampleComponent';
 import { Component } from '../lib/woowact/index';
+import { numberStore } from '../models/Number';
 
 type ExamplePageState = {
   count: number;
@@ -11,6 +12,8 @@ export default class ExamplePage extends Component<{}, ExamplePageState> {
   } = {};
   constructor() {
     super({});
+
+    numberStore.subscribe(this);
 
     this.state = {
       count: 2,
@@ -30,6 +33,7 @@ export default class ExamplePage extends Component<{}, ExamplePageState> {
   }
 
   componentDidUpdate() {
+    return;
     if (this.state.count < 30) {
       setTimeout(
         () =>
@@ -56,6 +60,9 @@ export default class ExamplePage extends Component<{}, ExamplePageState> {
   render(): string {
     return `
       <div id='id${this.state.count}' class='class1 class2'>
+        <h1 className='${numberStore.data.pickedNumber}'>${
+      numberStore.data.pickedNumber
+    }</h1>
         <ul>
           ${this.generateList()}
         </ul>

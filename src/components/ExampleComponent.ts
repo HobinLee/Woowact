@@ -1,4 +1,5 @@
 import { Component } from '../lib/woowact/index';
+import { numberStore } from '../models/Number';
 
 type ExampleComponentProps = {
   count: number;
@@ -12,7 +13,9 @@ export default class ExampleComponent extends Component<ExampleComponentProps> {
   }
 
   componentDidMount() {
-    this.$element.addEventListener('click', () => alert(this.props.count));
+    this.$element.addEventListener('click', () => {
+      numberStore.updateData({ pickedNumber: this.props.count });
+    });
   }
 
   render() {
