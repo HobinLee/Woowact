@@ -1,3 +1,40 @@
+const getAttNameList = (attributes: NamedNodeMap): string[] => {
+  const attributeList: string[] = [];
+
+  Array.prototype.forEach.call(attributes, (attr: Attr) => {
+    attributeList.push(attr.nodeName);
+  });
+
+  return attributeList;
+};
+
+const replaceAttributes = ($origin: HTMLElement, $new: HTMLElement): void => {
+  const attrNames: string[] = Array.from(
+    new Set([
+      ...getAttNameList($origin.attributes),
+      ...getAttNameList($new.attributes),
+    ]),
+  );
+
+  for (const attrName of attrNames) {
+    const originAttr: string | null = $origin.getAttribute(attrName);
+    const newAttr: string | null = $new.getAttribute(attrName);
+
+    //add attribute when attribute is not exist in old element
+    //replace attribute when attributes are differnet
+    if (newAttr && (!originAttr || originAttr !== newAttr)) {
+      $origin.setAttribute(attrName, newAttr);
+      continue;
+    }
+
+    //remove attribute when attribute is not exist in new element
+    if (originAttr && !newAttr) {
+      $origin.removeAttribute(attrName);
+      continue;
+    }
+  }
+};
+
 /**
  * reference - https://ko.reactjs.org/docs/reconciliation.html
  *
@@ -25,9 +62,11 @@ const reconciliation = (
     return $new;
   }
 
-  $origin.replaceWith($new);
+  /*
+   * Check attributes and replace it
+   */
+  replaceAttributes($origin, $new);
 
-  $origin.remove();
   return $new;
 };
 
