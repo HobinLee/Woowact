@@ -1,11 +1,16 @@
 import Component from './Component';
+export interface IData {
+  [key: string]: any;
+}
 
-export abstract class Store<StoreData> {
-  protected _data: StoreData;
+export abstract class Store<Data extends IData> {
+  protected _data: Data;
+  protected abstract actions: { [key: string]: (args?: any) => any };
+  protected abstract updateStore: (action: string, data: any) => void;
 
   private subscribers: Component[] = [];
 
-  constructor(data: StoreData) {
+  constructor(data: Data) {
     this._data = data;
   }
 
@@ -19,13 +24,25 @@ export abstract class Store<StoreData> {
     );
   };
 
-  public updateData = (partialData: Partial<StoreData>) => {
+  public dispatch = (action: string, args?: any) => {
+    try {
+      if (!this.actions[action]) {
+        throw new Error(action);
+      }
+
+      this.updateStore(action, this.actions[action](args));
+
+      this.updateSubscribers();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  protected updateData = (partialData: Partial<Data>) => {
     this._data = {
       ...this._data,
       ...partialData,
     };
-
-    this.updateSubscribers();
   };
 
   private updateSubscribers = () => {
@@ -34,7 +51,7 @@ export abstract class Store<StoreData> {
     );
   };
 
-  get data(): StoreData {
+  get data(): Data {
     return this._data;
   }
 }
