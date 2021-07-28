@@ -1,3 +1,3 @@
 export const checkSame = (jsonA: {}, jsonB: {}): boolean => {
-  return jsonA.toString() === jsonB.toString();
+  return JSON.stringify(jsonA) === JSON.stringify(jsonB);
 };
