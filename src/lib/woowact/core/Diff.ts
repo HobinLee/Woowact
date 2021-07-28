@@ -1,4 +1,8 @@
 const getAttNameList = (attributes: NamedNodeMap): string[] => {
+  if (!attributes) {
+    return [];
+  }
+
   const attributeList: string[] = [];
 
   Array.prototype.forEach.call(attributes, (attr: Attr) => {
@@ -35,15 +39,21 @@ const replaceAttributes = ($origin: HTMLElement, $new: HTMLElement): void => {
   }
 };
 
+const replaceNodeValue = ($origin: HTMLElement, $new: HTMLElement): void => {
+  if ($origin.nodeValue !== $new.nodeValue) {
+    $origin.nodeValue = $new.nodeValue;
+  }
+};
+
 const replaceChildren = ($origin: HTMLElement, $new: HTMLElement): void => {
-  const $originChildren = Array.from($origin.children);
-  const $newChildren = Array.from($new.children);
+  const $originChildren = Array.from($origin.childNodes);
+  const $newChildren = Array.from($new.childNodes);
 
   const max = Math.max($originChildren.length, $newChildren.length);
 
   for (let i = 0; i < max; i++) {
-    const $originChild = $originChildren[i] as HTMLElement;
-    const $newChild = $newChildren[i] as HTMLElement;
+    const $originChild = $originChildren[i];
+    const $newChild = $newChildren[i];
 
     if ($originChild && !$newChild) {
       $originChild.remove();
@@ -83,7 +93,7 @@ const reconciliation = (
     트리를 버릴 때 이전 DOM 노드들은 모두 파괴됩니다. 컴포넌트 인스턴스는 componentWillUnmount()가 실행됩니다. 새로운 트리가 만들어질 때, 새로운 DOM 노드들이 DOM에 삽입됩니다. 그에 따라 컴포넌트 인스턴스는 UNSAFE_componentWillMount()가 실행되고 componentDidMount()가 이어서 실행됩니다. 이전 트리와 연관된 모든 state는 사라집니다.
 
     루트 엘리먼트 아래의 모든 컴포넌트도 언마운트되고 그 state도 사라집니다. 예를 들어, 아래와 같은 비교가 일어나면,
-   */
+  **/
   if ($origin.tagName !== $new.tagName) {
     $origin.replaceWith($new);
     return $new;
@@ -93,6 +103,8 @@ const reconciliation = (
    * Check attributes and replace it
    */
   replaceAttributes($origin, $new);
+
+  replaceNodeValue($origin, $new);
 
   replaceChildren($origin, $new);
 
