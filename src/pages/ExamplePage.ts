@@ -33,7 +33,6 @@ export default class ExamplePage extends Component<{}, ExamplePageState> {
   }
 
   componentDidUpdate() {
-    return;
     if (this.state.count < 30) {
       setTimeout(
         () =>
@@ -59,14 +58,14 @@ export default class ExamplePage extends Component<{}, ExamplePageState> {
 
   render(): string {
     return `
-      <div id='id${this.state.count}' class='class1 class2'>
-        <h1 className='${numberStore.data.pickedNumber}'>${
-      numberStore.data.pickedNumber
-    }</h1>
-        <ul>
-          ${this.generateList()}
+    <div>
+      <h1>
+        ${numberStore.data.pickedNumber} years old.
+      </h1>
+      <ul>
+        ${this.generateList()}
         </ul>
-      </div>
+    </div>
     `;
   }
 }
