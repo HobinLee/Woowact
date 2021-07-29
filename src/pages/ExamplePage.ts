@@ -1,15 +1,22 @@
+import ExampleComponent from '../components/ExampleComponent';
 import { Component } from '../lib/woowact/index';
+import { numberStore } from '../models/Number';
 
 type ExamplePageState = {
   count: number;
 };
 
 export default class ExamplePage extends Component<{}, ExamplePageState> {
+  $list: {
+    [key: string]: Component;
+  } = {};
   constructor() {
     super({});
 
+    numberStore.subscribe(this);
+
     this.state = {
-      count: 0,
+      count: 2,
     };
 
     this.init();
@@ -21,17 +28,44 @@ export default class ExamplePage extends Component<{}, ExamplePageState> {
         this.setState({
           count: this.state.count + 1,
         }),
-      1000,
-    );
-    setTimeout(
-      () =>
-        this.setState({
-          count: this.state.count + 1,
-        }),
-      3000,
+      500,
     );
   }
+
+  componentDidUpdate() {
+    if (this.state.count < 30) {
+      setTimeout(
+        () =>
+          this.setState({
+            count: this.state.count + 1,
+          }),
+        500,
+      );
+    }
+  }
+
+  generateList(): string {
+    const count = this.state.count;
+    return Array.from(Array(count).keys())
+      .map(
+        i =>
+          `<li key = ${i}>${Component._(
+            this.addComponent(ExampleComponent, { count: i }),
+          )}</li>`,
+      )
+      .join('');
+  }
+
   render(): string {
-    return `<div>${this.state.count}</div>`;
+    return `
+    <div>
+      <h1>
+        ${numberStore.data.pickedNumber} years old.
+      </h1>
+      <ul>
+        ${this.generateList()}
+        </ul>
+    </div>
+    `;
   }
 }
