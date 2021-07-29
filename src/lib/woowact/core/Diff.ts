@@ -1,3 +1,5 @@
+import { getArrayN } from '../../../utils/array';
+
 const getAttNameList = (attributes: NamedNodeMap): string[] => {
   if (!attributes) {
     return [];
@@ -51,25 +53,25 @@ const replaceChildren = ($origin: HTMLElement, $new: HTMLElement): void => {
 
   const max = Math.max($originChildren.length, $newChildren.length);
 
-  for (let i = 0; i < max; i++) {
+  getArrayN(max).forEach(i => {
     const $originChild = $originChildren[i];
     const $newChild = $newChildren[i];
 
     if ($originChild && !$newChild) {
       $originChild.remove();
-      continue;
+      return;
     }
 
     if (!$originChild && $newChild) {
       $origin.appendChild($newChild);
-      continue;
+      return;
     }
 
     reconciliation(
       $originChildren[i] as HTMLElement,
       $newChildren[i] as HTMLElement,
     );
-  }
+  });
 };
 
 /**
