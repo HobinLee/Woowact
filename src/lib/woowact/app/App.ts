@@ -11,7 +11,7 @@ export default class App extends Component {
         throw new Error(`html doesn't have #app element`);
       }
 
-      $app.appendChild(component.getElement() as Node);
+      $app.appendChild(component.$element as Node);
     } catch (e) {
       console.error(e);
     }
