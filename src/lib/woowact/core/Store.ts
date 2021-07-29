@@ -5,8 +5,8 @@ export interface IData {
 
 export abstract class Store<Data extends IData> {
   protected _data: Data;
-  protected abstract actions: { [key: string]: (args?: any) => any };
-  protected abstract updateStore: (action: string, data: any) => void;
+  protected abstract actions: { [key: string]: (args?: any) => Partial<Data> };
+  protected abstract updateStore: (action: string, data: Partial<Data>) => void;
 
   private subscribers: Component[] = [];
 
