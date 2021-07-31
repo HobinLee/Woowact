@@ -54,7 +54,7 @@ export default class Component<
     } catch (e) {
       console.error(e.message);
 
-      //it doen't work
+      //it doesn't work
       return document.createElement('error');
     }
   }
@@ -103,11 +103,7 @@ export default class Component<
     this.update();
   }
 
-  public updateBy(partialState?: Partial<S>) {
-    if (partialState) {
-      this.setState(partialState);
-    }
-
+  public updateBy() {
     this.update();
   }
 
