@@ -1,7 +1,6 @@
 import { checkSame } from '../../../utils/json';
 import Diff from './Diff';
 import { parseJSX } from './myJSX';
-import { Store } from './Store';
 
 export interface PropsType {}
 export interface StateType {}
@@ -38,8 +37,12 @@ export default class Component<
 
   // this should be called in constructor of 'Child Class Component'
   protected init() {
-    this._$element = parseJSX(this.render(), this.$components);
+    this._$element = this.$newElement;
     this.componentDidMount();
+  }
+
+  private get $newElement() {
+    return parseJSX(this.render(), this.$components);
   }
 
   get $element(): HTMLElement {
@@ -76,17 +79,15 @@ export default class Component<
 
   private update(): void {
     try {
-      const $new = parseJSX(this.render(), this.$components);
-
       if (this._$element === null) {
-        this._$element = $new;
+        this._$element = this.$newElement;
 
         throw new Error(
           `component doesn't have element. please call init() in its constructor.`,
         );
       }
 
-      this._$element = Diff.reconciliation(this.$element, $new);
+      this._$element = Diff.reconciliation(this.$element, this.$newElement);
       this.componentDidUpdate();
     } catch (e) {
       console.error(e);
