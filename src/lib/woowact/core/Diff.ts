@@ -1,5 +1,9 @@
 import { getArrayN } from '../../../utils/array';
 
+type TKeyElement = {
+  [key: string]: Element;
+};
+
 const getAttNameList = (attributes: NamedNodeMap): string[] => {
   if (!attributes) {
     return [];
@@ -48,12 +52,58 @@ const replaceNodeValue = ($origin: HTMLElement, $new: HTMLElement): void => {
 };
 
 const replaceChildren = ($origin: HTMLElement, $new: HTMLElement): void => {
+  if ($origin.tagName === 'UL' || $origin.tagName === 'OL') {
+    replaceByKeys($origin, $new);
+    return;
+  }
+
+  replaceStartToEnd($origin, $new);
+};
+
+const getKeyNodes = ($element: HTMLElement): { [key: number]: Element } => {
+  const keyNodes: TKeyElement = {};
+  Array.from($element.children).forEach(child => {
+    const key: string | null = (child as HTMLElement).getAttribute('key');
+
+    if (!key) {
+      console.error('child component must have key');
+      return;
+    }
+
+    keyNodes[key] = child as HTMLElement;
+  });
+  return keyNodes;
+};
+
+const replaceByKeys = ($origin: HTMLElement, $new: HTMLElement) => {
+  const $originKeyNodes: TKeyElement = getKeyNodes($origin);
+  const newKeyArray = Array.from($new.children);
+
+  $origin.innerHTML = '';
+
+  newKeyArray.forEach(child => {
+    const key: string | null = (child as HTMLElement).getAttribute('key');
+
+    if (!key) {
+      console.error('child component must have key');
+      return;
+    }
+
+    if ($originKeyNodes[key]) {
+      $origin.appendChild($originKeyNodes[key]);
+    } else {
+      $origin.appendChild(child);
+    }
+  });
+};
+
+const replaceStartToEnd = ($origin: HTMLElement, $new: HTMLElement) => {
   const $originChildren = Array.from($origin.childNodes);
   const $newChildren = Array.from($new.childNodes);
 
   const max = Math.max($originChildren.length, $newChildren.length);
 
-  getArrayN(max).forEach(i => {
+  getArrayN(max).forEach((i: number) => {
     const $originChild = $originChildren[i];
     const $newChild = $newChildren[i];
 
@@ -98,6 +148,7 @@ const reconciliation = (
   **/
   if ($origin.tagName !== $new.tagName) {
     $origin.replaceWith($new);
+    $origin.remove();
     return $new;
   }
 
