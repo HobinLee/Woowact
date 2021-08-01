@@ -13,7 +13,7 @@ export type ComponentId = string;
 
 const TAG: string = 'C-';
 
-export default class Component<
+export default abstract class Component<
   P extends PropsType = PropsType,
   S extends StateType = StateType,
 > {
@@ -73,9 +73,7 @@ export default class Component<
     return newComponent;
   }
 
-  protected render(): string {
-    throw new Error('need to be implemented');
-  }
+  protected abstract render(): string;
 
   private update(): void {
     try {
