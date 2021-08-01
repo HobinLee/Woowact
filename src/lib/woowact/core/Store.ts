@@ -5,10 +5,8 @@ export interface IData {
 
 export abstract class Store<Data extends IData> {
   protected _data: Data;
-  protected abstract actions: {
-    [key: string]: (args?: any) => Partial<Data> | Promise<Partial<Data>>;
-  };
-  protected abstract updateStore: (action: string, data: Partial<Data>) => void;
+  protected abstract actions: { [key: string]: (args?: any) => any };
+  protected abstract updateStore: (action: string, data: any) => void;
 
   private subscribers: Component[] = [];
 
@@ -26,19 +24,13 @@ export abstract class Store<Data extends IData> {
     );
   };
 
-  public dispatch = async (action: string, args?: any) => {
+  public dispatch = (action: string, args?: any) => {
     try {
       if (!this.actions[action]) {
         throw new Error(action);
       }
 
-      const updatedData = this.actions[action](args);
-
-      if (updatedData instanceof Promise) {
-        this.updateStore(action, await updatedData);
-      } else {
-        this.updateStore(action, updatedData);
-      }
+      this.updateStore(action, this.actions[action](args));
 
       this.updateSubscribers();
     } catch (e) {
