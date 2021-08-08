@@ -65,7 +65,10 @@ export default abstract class Component<
   protected componentDidUpdate() {}
   protected componentDidMount() {}
 
-  protected addComponent<PT = PropsType>(component: any, props: PT): Component {
+  protected addComponent<PT = PropsType>(
+    component: any,
+    props?: PT,
+  ): Component {
     const newComponent: Component = new component(props);
 
     this.$components[newComponent.id] = newComponent;
@@ -106,7 +109,7 @@ export default abstract class Component<
     this.update();
   }
 
-  protected static _($component: Component): string {
-    return `<${$component.id}></${$component.id}>`;
+  get html() {
+    return `<${this.id}></${this.id}>`;
   }
 }
