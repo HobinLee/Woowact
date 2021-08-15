@@ -62,8 +62,8 @@ export default class App extends Component {
     return `<div>
     <nav>
       <ul>
-        ${Component._(this.LinkTo1)}
-        ${Component._(this.LinkTo2)}
+        ${this.LinkTo1.html}
+        ${this.LinkTo2.html}
       </ul>
     </nav>
     <div class='content'></div>

@@ -49,9 +49,9 @@ export default class ExamplePage extends Component<{}, ExamplePageState> {
     return Array.from(Array(count).keys())
       .map(
         i =>
-          `<li key = ${i}>${Component._(
-            this.addComponent(ExampleComponent, { count: i }),
-          )}</li>`,
+          `<li key = ${i}>${
+            this.addComponent(ExampleComponent, { count: i }).html
+          }</li>`,
       )
       .join('');
   }
