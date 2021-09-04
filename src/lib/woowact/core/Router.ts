@@ -24,18 +24,14 @@ export default class Link extends Component<LinkProps> {
   }
 
   onClick() {
-    moveTo(this.props.to);
+    const routeEvent = new CustomEvent('pushstate', {
+      detail: {
+        pathname: this.props.to,
+      },
+    });
+
+    window.dispatchEvent(routeEvent);
   }
-}
-
-export const moveTo = (path: string) => {
-  const routeEvent = new CustomEvent('pushstate', {
-    detail: {
-      pathname: path,
-    },
-  });
-
-  window.dispatchEvent(routeEvent);
 }
 
 export class Router {

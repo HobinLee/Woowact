@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const prod = process.env.NODE_ENV === 'production';
@@ -55,6 +56,11 @@ module.exports = {
       filename: '[name].css',
       chunkFilename: '[id].css',
     }),
+    /*
+    new CopyWebpackPlugin([{
+      from: './favicon.ico',
+      to: './favicon.ico'
+    }]),*/
     new webpack.HotModuleReplacementPlugin(),
   ],
   optimization: { minimize: true },

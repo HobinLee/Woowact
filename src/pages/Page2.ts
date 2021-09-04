@@ -1,5 +1,7 @@
+import ExampleComponent from '../components/ExampleComponent';
 import { Component } from '../lib/woowact/index';
 import { numberStore } from '../models/Number';
+import './index.scss';
 
 export default class Page2 extends Component {
   constructor() {
