@@ -55,7 +55,7 @@ export default abstract class Component<
 
       return this._$element;
     } catch (e) {
-      console.error(e.message);
+      console.error(e);
 
       //it doesn't work
       return document.createElement('error');
