@@ -1,4 +1,4 @@
-import ExampleComponent from '../components/ExampleComponent';
+import ExpensiveComponent from '../components/ExampleComponent';
 import { Component } from '../lib/woowact/index';
 import { numberStore } from '../models/Number';
 
@@ -50,7 +50,7 @@ export default class ExamplePage extends Component<{}, ExamplePageState> {
       .map(
         i =>
           `<li key = ${i}>${
-            this.addComponent(ExampleComponent, { count: i }).html
+            this.addComponent(ExpensiveComponent, { count: i }).html
           }</li>`,
       )
       .join('');

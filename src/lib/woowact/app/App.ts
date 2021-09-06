@@ -1,4 +1,3 @@
-import ExampleComponent from '../../../components/ExampleComponent';
 import ExamplePage from '../../../pages/ExamplePage';
 import Page2 from '../../../pages/Page2';
 import { $ } from '../../../utils/selector';

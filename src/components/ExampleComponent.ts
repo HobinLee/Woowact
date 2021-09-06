@@ -1,12 +1,12 @@
 import { Component } from '../lib/woowact/index';
 import { CHANGE_NUMBER, numberStore } from '../models/Number';
 
-type ExampleComponentProps = {
+type ExpensiveComponentProps = {
   count: number;
 };
 
-export default class ExampleComponent extends Component<ExampleComponentProps> {
-  constructor(props: ExampleComponentProps) {
+export default class ExpensiveComponent extends Component<ExpensiveComponentProps> {
+  constructor(props: ExpensiveComponentProps) {
     super(props);
 
     this.init();
@@ -20,7 +20,7 @@ export default class ExampleComponent extends Component<ExampleComponentProps> {
 
   render() {
     return `
-      <div>${this.props.count}</div>
+      <div>${this.props.count}<span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span><span>ㅣ</span></div>
     `;
   }
 }
