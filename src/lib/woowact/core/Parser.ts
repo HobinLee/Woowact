@@ -1,4 +1,4 @@
-import { Attributes, WoowactElement, WoowactNode } from "./VDOM";
+import { $elements, Attributes, WoowactElement, WoowactNode } from "./VDOM";
 
 const checkCloseTag = (tagName: string) => {
   return tagName[0] === '/';
@@ -60,7 +60,6 @@ export const parseJSX = (markup: string): WoowactElement | undefined => {
         htmlStack.pop();
       }
     };
-
     const tags = parseHTML(markup);
 
     if (!tags) {
@@ -69,6 +68,11 @@ export const parseJSX = (markup: string): WoowactElement | undefined => {
 
     tags.forEach(tag => {
       const tagName = getTagName(tag);
+
+      if (tagName && $elements[tagName.slice(0, -1)]) {
+        getLastTag()?.children.push($elements[tagName.slice(0, -1)]);
+        return;
+      }
 
       controlNonCloseTag(tag, tagName);
 
@@ -151,11 +155,10 @@ const parseAttribute = (attribute: string): Attribute | undefined => {
  *
  * innertText: tadfsasd
  */
-const getTagName = (markup: string): string | undefined => {
+export const getTagName = (markup: string): string | undefined => {
   try {
     const getCloseTagName = () => {
       const regexResult = /<(\/\w+).*/gi.exec(markup);
-
       if (!regexResult || regexResult.length < 1) {
         throw new Error(`Error: 올바른 입력 양식이 아닙니다. ${markup}`);
         return '';
