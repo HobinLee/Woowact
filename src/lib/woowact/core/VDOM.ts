@@ -1,5 +1,5 @@
 import Component from "./Component";
-import { parseJSX } from "./Parser";
+import { getTagName, parseJSX } from "./Parser";
 
 type Key = string | number;
 
@@ -14,11 +14,19 @@ export type WoowactText = string | number;
 
 export type WoowactNode = WoowactElement | WoowactText | undefined;
 
+export const $elements: {
+  [key: string]: WoowactNode
+} = {};
+let i = 0;
+
 export const createElement = (renderTemplate: string, components?: {
   [key: string]: Component | WoowactNode | undefined;
-} ): WoowactElement | undefined => {
-  
-  return parseJSX(renderTemplate);
+} ): string => {
+  const $node = parseJSX(renderTemplate);
+  const name = `component${i++}`;
+  $elements[name] = $node;
+
+  return `<${name} />`;
 }
 
 type AttributeKey = string;
@@ -26,13 +34,13 @@ type AttributeValue = string;
 
 export type Attributes = Map<AttributeKey, AttributeValue>;
 
-export const renderDOM = ($wNode: WoowactNode, $el: HTMLElement | null) => {
+export const renderDOM = (nodeName: string, $el: HTMLElement | null) => {
   try {
     if (!$el) {
       throw Error('Cannot append HTML element to parent. Please check id or class of Element');
     }
-    const $componentElemet = changeToHTMLElement($wNode);
-    $componentElemet && $el.appendChild($componentElemet);
+    const $componentElement = changeToHTMLElement($elements[getTagName(nodeName)?.slice(0, -1) ?? '']);
+    $componentElement && $el.appendChild($componentElement);
   } catch(e) {
     console.error(e);
     return null;

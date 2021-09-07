@@ -1,14 +1,14 @@
+import { ComponentA } from '../../../components/ComponentA';
+import { ComponentB } from '../../../components/ComponentB';
 import { createElement, WoowactNode } from '../core/VDOM';
 
-export const App = (): WoowactNode => {
+export const App = (): string => {
   return createElement(`<div>
-    <h3>Hello! this is test component</h3>
-    <ul id="list">
-      <li key='1'>1</li>
-      <li key='2'>2</li>
-      <li key='3'>3</li>
-      <li key='4'>4</li>
-      <li key='5'>5</li>
-    </ul>
+    <h3>Hello! this is test page</h3>
+
+    ${ComponentA('testA')}
+    ${ComponentA('testB')}
+
+    ${ComponentB(20)}
   </div>`);
 }
