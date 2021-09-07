@@ -151,7 +151,7 @@ const parseAttribute = (attribute: string): Attribute | undefined => {
  *
  * innertText: tadfsasd
  */
-const getTagName = (markup: string): string | undefined => {
+export const getTagName = (markup: string): string | undefined => {
   try {
     const getCloseTagName = () => {
       const regexResult = /<(\/\w+).*/gi.exec(markup);
