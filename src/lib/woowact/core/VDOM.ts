@@ -39,7 +39,10 @@ export const renderDOM = (nodeName: string, $el: HTMLElement | null) => {
     if (!$el) {
       throw Error('Cannot append HTML element to parent. Please check id or class of Element');
     }
-    const $componentElement = changeToHTMLElement($elements[getTagName(nodeName)?.slice(0, -1) ?? '']);
+    const tagName = getTagName(nodeName)?.slice(0, -1) ?? '';
+    
+    const $componentElement = changeToHTMLElement($elements[tagName]);
+
     $componentElement && $el.appendChild($componentElement);
   } catch(e) {
     console.error(e);
@@ -64,9 +67,15 @@ const changeToHTMLElement = ($woowactNode: WoowactNode): Node | undefined => {
 const createHTMLElement = ($woowactElement: WoowactElement): HTMLElement | undefined => {
   if (!$woowactElement) return;
 
-  const $htmlElement = document.createElement($woowactElement?.tag);
+  const $htmlElement: HTMLElement = document.createElement($woowactElement?.tag);
 
-  $woowactElement.attributes?.forEach((value, key) => $htmlElement.setAttribute(key, value))
+  $woowactElement.attributes?.forEach((value, key) => {
+    if(checkEventHandler(key)) {
+      $htmlElement['onclick'] = () => {alert('click')};
+      return;
+    }
+    $htmlElement.setAttribute(key, value);
+  })
 
   $woowactElement.children?.forEach($woowactNode => {
     const $node = changeToHTMLElement($woowactNode);
@@ -74,4 +83,12 @@ const createHTMLElement = ($woowactElement: WoowactElement): HTMLElement | undef
   })
 
   return $htmlElement;
+}
+
+const checkEventHandler = (attr: string) => {
+  return attr === 'onclick' ||
+  attr === 'onmouseMove' ||
+  attr === 'onchange' ||
+  attr === 'oninput' ||
+  attr === 'onmouseOver'
 }
