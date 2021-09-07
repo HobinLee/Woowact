@@ -1,6 +1,6 @@
 import { checkSame } from '../../../utils/json';
-import Diff from './Diff';
-import { parseJSX } from './myJSX';
+
+import { createElement, WoowactElement, WoowactNode } from './VDOM';
 
 export interface PropsType {}
 export interface StateType {}
@@ -21,7 +21,7 @@ export default abstract class Component<
   state: S;
 
   public id: ComponentId = TAG + Component.ID;
-  private _$element: HTMLElement | null = null;
+  private _$element: WoowactElement = null;
 
   static ID: number = 0;
 
@@ -35,17 +35,21 @@ export default abstract class Component<
     this.state = {} as S;
   }
 
+  protected componentDidUpdate() {}
+  protected componentDidMount() {}
+  protected componentWillUnmount() {}
+  
   // this should be called in constructor of 'Child Class Component'
   protected init() {
     this._$element = this.$newElement;
     this.componentDidMount();
   }
 
-  private get $newElement() {
-    return parseJSX(this.render(), this.$components);
+  private get $newElement(): WoowactElement {
+    return createElement(this.render(), this.$components);
   }
 
-  get $element(): HTMLElement {
+  get $element(): WoowactNode {
     try {
       if (this._$element === null) {
         throw new Error(
@@ -53,28 +57,26 @@ export default abstract class Component<
         );
       }
 
+      createElement(this.render(), this.$components);
       return this._$element;
     } catch (e) {
       console.error(e);
-
+      return null;
       //it doesn't work
-      return document.createElement('error');
+      //return document.createElement('error');
     }
   }
+  
+  // protected addComponent<PT = PropsType>(
+  //   component: any,
+  //   props?: PT,
+  // ): Component {
+  //   const newComponent: Component = new component(props);
 
-  protected componentDidUpdate() {}
-  protected componentDidMount() {}
+  //   this.$components[newComponent.id] = newComponent;
 
-  protected addComponent<PT = PropsType>(
-    component: any,
-    props?: PT,
-  ): Component {
-    const newComponent: Component = new component(props);
-
-    this.$components[newComponent.id] = newComponent;
-
-    return newComponent;
-  }
+  //   return newComponent;
+  // }
 
   protected abstract render(): string;
 
@@ -88,7 +90,7 @@ export default abstract class Component<
         );
       }
 
-      this._$element = Diff.reconciliation(this.$element, this.$newElement);
+      //this._$element = Diff.reconciliation(this.$element, this.$newElement);
       this.componentDidUpdate();
     } catch (e) {
       console.error(e);
