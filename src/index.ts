@@ -1,3 +1,4 @@
-import { App } from './lib/woowact/index';
+import { renderDOM } from './lib/woowact/core/VDOM';
+import { App } from './lib/woowact/app/App';
 
-new App();
+renderDOM(App(), document.getElementById('App'));
