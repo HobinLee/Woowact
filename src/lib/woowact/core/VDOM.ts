@@ -1,11 +1,12 @@
 import Component from "./Component";
+import { parseJSX } from "./Parser";
 
 type Key = string | number;
 
 export type WoowactElement = {
   tag: string;
-  attributes?: Map<AttributeKey, AttributeValues>,
-  children?: WoowactNode[];
+  attributes?: Attributes,
+  children: WoowactNode[];
   key?: Key | null;
 } | null;
 
@@ -13,25 +14,24 @@ export type WoowactText = string | number;
 
 export type WoowactNode = WoowactElement | WoowactText | undefined;
 
-export const createElement = (renderTemplate: string, components: {
-  [key: string]: Component;
-} ): WoowactElement => {
+export const createElement = (renderTemplate: string, components?: {
+  [key: string]: Component | WoowactNode | undefined;
+} ): WoowactElement | undefined => {
   
-  return {
-    tag: 'div',
-    children: ['TEST']
-  }
+  return parseJSX(renderTemplate);
 }
 
 type AttributeKey = string;
-type AttributeValues = string[];
+type AttributeValue = string;
 
-export const render = ({ $element }: Component, $el: HTMLElement | null) => {
+export type Attributes = Map<AttributeKey, AttributeValue>;
+
+export const renderDOM = ($wNode: WoowactNode, $el: HTMLElement | null) => {
   try {
     if (!$el) {
       throw Error('Cannot append HTML element to parent. Please check id or class of Element');
     }
-    const $componentElemet = changeToHTMLElement($element);
+    const $componentElemet = changeToHTMLElement($wNode);
     $componentElemet && $el.appendChild($componentElemet);
   } catch(e) {
     console.error(e);
@@ -58,11 +58,7 @@ const createHTMLElement = ($woowactElement: WoowactElement): HTMLElement | undef
 
   const $htmlElement = document.createElement($woowactElement?.tag);
 
-  $woowactElement.attributes?.forEach((values, key) => {
-    values.forEach(value => {
-      $htmlElement.setAttribute(key, value);
-    })
-  })
+  $woowactElement.attributes?.forEach((value, key) => $htmlElement.setAttribute(key, value))
 
   $woowactElement.children?.forEach($woowactNode => {
     const $node = changeToHTMLElement($woowactNode);

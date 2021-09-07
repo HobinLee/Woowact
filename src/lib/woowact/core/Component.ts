@@ -45,8 +45,9 @@ export default abstract class Component<
     this.componentDidMount();
   }
 
-  private get $newElement(): WoowactElement {
-    return createElement(this.render(), this.$components);
+  private get $newElement(): WoowactElement | null {
+    return null;
+    //return createElement(this.render(), this.$components);
   }
 
   get $element(): WoowactNode {
