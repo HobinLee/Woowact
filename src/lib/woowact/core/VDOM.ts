@@ -49,6 +49,20 @@ export const renderDOM = (nodeName: string, $el: HTMLElement | null) => {
     return null;
   }
 }
+export const renderWoowactElement = (node: WoowactElement, $el: HTMLElement | null) => {
+  try {
+    if (!$el) {
+      throw Error('Cannot append HTML element to parent. Please check id or class of Element');
+    }
+    
+    const $componentElement = changeToHTMLElement(node);
+
+    $componentElement && $el.appendChild($componentElement);
+  } catch(e) {
+    console.error(e);
+    return null;
+  }
+}
 
 const changeToHTMLElement = ($woowactNode: WoowactNode): Node | undefined => {
   if (!$woowactNode) return;

@@ -1,19 +1,24 @@
 import { ComponentA } from '../../../components/ComponentA';
 import { ComponentB } from '../../../components/ComponentB';
-import { createElement, WoowactNode } from '../core/VDOM';
+import { useState } from '../core/Hooks';
+import { WoowactElement } from '../core/VDOM';
 
-export const App = (): string => {
-  let count = 20;
+export const App = (): WoowactElement => {
+  const [count, setCount] = useState<number>(0);
+
   const handleClick = () => {
-    alert(`count is ${count ++}`);
+    setCount(count() + 1);
   }
   
-  return createElement(`<div>
-    <h3>Hello! this is test page</h3>
-    <button onclick="aa">+</button>
-    ${ComponentA('testA')}
-    ${ComponentA('testB')}
-
-    ${ComponentB(count)}
-  </div>`);
+  return {
+    tag: 'div',
+    children: [{
+        tag: 'h3',
+        children: [count().toString()]
+      }, {
+        tag: 'button',
+        children: ['+'],
+      }
+    ]
+  }
 }

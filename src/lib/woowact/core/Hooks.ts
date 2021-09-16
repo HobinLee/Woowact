@@ -11,12 +11,3 @@ export function useState<T> (initVaule: T): [() => T, (newValue: T) => void] {
   
   return [state, setState];
 }
-
-const Counter = () => {
-  const [count, setCount] = useState<number>(0);
-
-  return {
-    click: () => setCount(count() + 1),
-    render: () => console.log('render', { count: count()})
-  }
-}
