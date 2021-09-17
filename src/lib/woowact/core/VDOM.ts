@@ -80,18 +80,20 @@ const changeToHTMLElement = ($woowactNode: WoowactNode): Node | undefined => {
   return createHTMLElement($woowactNode);
 }
 
+type Events = 'onclick' | 'onmousemove' | 'onchange' | 'oninput' | 'onmouseover'
+
 const createHTMLElement = ($woowactElement: WoowactElement): HTMLElement | undefined => {
   if (!$woowactElement) return;
 
   const $htmlElement: HTMLElement = document.createElement($woowactElement?.tag);
 
   $woowactElement.attributes?.forEach((value, key) => {
-    if(typeof value !== 'string') {
-      $htmlElement['onclick'] = value;
+    if(typeof value === 'string') {
+      $htmlElement.setAttribute(key, value);
       return;
     }
-
-    $htmlElement.setAttribute(key, value);
+    const event = checkEventHandler(key);
+    event && ($htmlElement[event] = value);
   })
 
   $woowactElement.children?.forEach($woowactNode => {
@@ -102,14 +104,13 @@ const createHTMLElement = ($woowactElement: WoowactElement): HTMLElement | undef
   return $htmlElement;
 }
 
-const addEvents = () => {
-  
-}
 
-const checkEventHandler = (attr: string) => {
-  return attr === 'onclick' ||
-  attr === 'onmouseMove' ||
+const checkEventHandler = (attr: string): Events | null => {
+  if(attr === 'onclick' ||
+  attr === 'onmousemove' ||
   attr === 'onchange' ||
   attr === 'oninput' ||
-  attr === 'onmouseOver'
+  attr === 'onmouseover') return attr;
+
+  return null;
 }
