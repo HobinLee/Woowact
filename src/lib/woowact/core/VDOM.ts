@@ -29,8 +29,10 @@ export const createElement = (renderTemplate: string, components?: {
   return `<${name} />`;
 }
 
+type EventHandler = (e: Event | null) => void;
+
 type AttributeKey = string;
-type AttributeValue = string;
+type AttributeValue = string | EventHandler;
 
 export type Attributes = Map<AttributeKey, AttributeValue>;
 
@@ -84,10 +86,11 @@ const createHTMLElement = ($woowactElement: WoowactElement): HTMLElement | undef
   const $htmlElement: HTMLElement = document.createElement($woowactElement?.tag);
 
   $woowactElement.attributes?.forEach((value, key) => {
-    if(checkEventHandler(key)) {
-      $htmlElement['onclick'] = () => {alert('click')};
+    if(typeof value !== 'string') {
+      $htmlElement['onclick'] = value;
       return;
     }
+
     $htmlElement.setAttribute(key, value);
   })
 
@@ -97,6 +100,10 @@ const createHTMLElement = ($woowactElement: WoowactElement): HTMLElement | undef
   })
 
   return $htmlElement;
+}
+
+const addEvents = () => {
+  
 }
 
 const checkEventHandler = (attr: string) => {

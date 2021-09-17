@@ -18,6 +18,7 @@ export const App = (): WoowactElement => {
       }, {
         tag: 'button',
         children: ['+'],
+        attributes: new Map().set('onclick', handleClick)
       }
     ]
   }
