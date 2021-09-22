@@ -1,4 +1,5 @@
 import { ComponentA } from '../../../components/ComponentA';
+import { ComponentB } from '../../../components/ComponentB';
 import { WoowactElement } from '../core/VDOM';
 
 export const App = (): WoowactElement => {
@@ -6,7 +7,8 @@ export const App = (): WoowactElement => {
     tag: 'div',
     children: [
       ComponentA(0),
-      ComponentA(100)
+      ComponentA(100),
+      ComponentB(),
     ]
   }
 }
