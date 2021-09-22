@@ -1,4 +1,4 @@
-import { renderWoowactElement } from './lib/woowact/core/VDOM';
 import { App } from './lib/woowact/app/App';
+import { Woowact } from './lib/woowact/core/Hooks';
 
-renderWoowactElement(App(), document.getElementById('App'));
+Woowact.renderDOM(App);

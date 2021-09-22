@@ -1,13 +1,38 @@
-export function useState<T> (initVaule: T): [() => T, (newValue: T) => void] {
-  let _val: T = initVaule;
+import { isRegExp } from "util/types";
+import { reconciliation, WoowactComponent, WoowactElement, WoowactNode } from "./VDOM";
+import { renderWoowactElement } from './VDOM';
 
-  function state(): T {
-    return _val;
-  }
+export const Woowact = (function(){
+  let hooks: any[] = [];
+  let idx: number = 0;
+  let rootComponent: WoowactComponent;
+  let $origin: WoowactElement;
+
+  function useState<T> (initVaule: T): [T, (newValue: T) => void] {
+    const state: T = hooks[idx] || initVaule;
+
+    const _idx = idx;
   
-  function setState(newValue: T) {
-    _val = newValue;
+    function setState(newValue: T) {
+      hooks[_idx] = newValue;
+      render();
+    }
+
+    idx ++;
+    
+    return [state, setState];
   }
-  
-  return [state, setState];
-}
+
+  function render() {
+    idx = 0;
+    $origin = reconciliation($origin, rootComponent());    
+  }
+
+  function renderDOM(appComponent: WoowactComponent) {
+    rootComponent = appComponent;
+    $origin = rootComponent();
+    renderWoowactElement($origin, document.getElementById('App'));
+  }
+
+  return { useState, renderDOM }
+}());

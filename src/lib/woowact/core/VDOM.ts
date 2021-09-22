@@ -8,6 +8,7 @@ export type WoowactElement = {
   attributes?: Attributes,
   children: WoowactNode[];
   key?: Key | null;
+  $el?: Node;
 } | null;
 
 export type WoowactText = string | number;
@@ -18,6 +19,8 @@ export const $elements: {
   [key: string]: WoowactNode
 } = {};
 let i = 0;
+
+export type WoowactComponent = () => WoowactElement;
 
 export const createElement = (renderTemplate: string, components?: {
   [key: string]: Component | WoowactNode | undefined;
@@ -51,13 +54,33 @@ export const renderDOM = (nodeName: string, $el: HTMLElement | null) => {
     return null;
   }
 }
+
+export const reconciliation = ($old: WoowactElement, $new: WoowactElement): WoowactElement => {
+  if (!$new) return $old;
+
+  const $componentElement = changeToHTMLElement($new);
+    
+  if (!$old?.$el || !$componentElement) return $old;
+
+  $new.$el = $componentElement;
+
+  ($old.$el as HTMLElement).replaceWith($componentElement);
+
+  return $new;
+}
+
 export const renderWoowactElement = (node: WoowactElement, $el: HTMLElement | null) => {
   try {
     if (!$el) {
       throw Error('Cannot append HTML element to parent. Please check id or class of Element');
     }
+    if (!node) return;
     
     const $componentElement = changeToHTMLElement(node);
+    
+    if (!$componentElement) return;
+
+    node.$el = $componentElement;
 
     $componentElement && $el.appendChild($componentElement);
   } catch(e) {
