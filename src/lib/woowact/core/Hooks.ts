@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { WoowactNode } from "./VDOM";
 
 export const Woowact = (function(){
@@ -25,3 +26,18 @@ export const Woowact = (function(){
 
   return {useState, render}
 }())
+=======
+export function useState<T> (initVaule: T): [() => T, (newValue: T) => void] {
+  let _val: T = initVaule;
+
+  function state(): T {
+    return _val;
+  }
+  
+  function setState(newValue: T) {
+    _val = newValue;
+  }
+  
+  return [state, setState];
+}
+>>>>>>> 027716d4f8a520decaa8591fb5604bc9ec2d48a2
