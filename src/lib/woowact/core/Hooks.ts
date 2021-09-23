@@ -1,5 +1,4 @@
-import { isRegExp } from "util/types";
-import { reconciliation, WoowactComponent, WoowactElement, WoowactNode } from "./VDOM";
+import { updateRender, WoowactComponent, WoowactElement, WoowactNode } from "./VDOM";
 import { renderWoowactElement } from './VDOM';
 
 export const Woowact = (function(){
@@ -25,7 +24,7 @@ export const Woowact = (function(){
 
   function render() {
     idx = 0;
-    $origin = reconciliation($origin, rootComponent());    
+    $origin = updateRender($origin, rootComponent());    
   }
 
   function renderDOM(appComponent: WoowactComponent) {
