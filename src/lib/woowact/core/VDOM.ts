@@ -1,4 +1,5 @@
 import Component from "./Component";
+import { reconciliation } from "./Diff";
 import { getTagName, parseJSX } from "./Parser";
 
 type Key = string | number;
@@ -55,16 +56,10 @@ export const renderDOM = (nodeName: string, $el: HTMLElement | null) => {
   }
 }
 
-export const reconciliation = ($old: WoowactElement, $new: WoowactElement): WoowactElement => {
+export const updateRender = ($old: WoowactElement, $new: WoowactElement): WoowactElement => {
   if (!$new) return $old;
-
-  const $componentElement = changeToHTMLElement($new);
-    
-  if (!$old?.$el || !$componentElement) return $old;
-
-  $new.$el = $componentElement;
-
-  ($old.$el as HTMLElement).replaceWith($componentElement);
+  
+  $new = reconciliation($old, $new);
 
   return $new;
 }
@@ -80,8 +75,6 @@ export const renderWoowactElement = (node: WoowactElement, $el: HTMLElement | nu
     
     if (!$componentElement) return;
 
-    node.$el = $componentElement;
-
     $componentElement && $el.appendChild($componentElement);
   } catch(e) {
     console.error(e);
@@ -89,7 +82,7 @@ export const renderWoowactElement = (node: WoowactElement, $el: HTMLElement | nu
   }
 }
 
-const changeToHTMLElement = ($woowactNode: WoowactNode): Node | undefined => {
+export const changeToHTMLElement = ($woowactNode: WoowactNode): Node | undefined => {
   if (!$woowactNode) return;
 
   if (typeof $woowactNode === 'string') {
@@ -123,6 +116,8 @@ const createHTMLElement = ($woowactElement: WoowactElement): HTMLElement | undef
     const $node = changeToHTMLElement($woowactNode);
     $node && $htmlElement.appendChild($node);
   })
+
+  $woowactElement.$el = $htmlElement;
 
   return $htmlElement;
 }

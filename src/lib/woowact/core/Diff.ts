@@ -1,126 +1,47 @@
 import { getArrayN } from '../../../utils/array';
+import { WoowactElement, changeToHTMLElement } from './VDOM';
 
-type TKeyElement = {
-  [key: string]: Element;
+const replaceAttributes = ($origin: WoowactElement, $new: WoowactElement): void => {
+//   const originAttr: string[] = $origin?.attributes. ?? [];
+//   const newAttr: st
+//   const attrNames: string[] = Array.from(
+//     new Set([
+//       ...$origin?.attributes,
+//       ...$new?.attributes,
+//     ]),
+//   );
+
+//   for (const attrName of attrNames) {
+//     const originAttr: string | null = $origin.getAttribute(attrName);
+//     const newAttr: string | null = $new.getAttribute(attrName);
+
+//     //add attribute when attribute is not exist in old element
+//     //replace attribute when attributes are differnet
+//     if (newAttr && (!originAttr || originAttr !== newAttr)) {
+//       $origin.setAttribute(attrName, newAttr);
+//       continue;
+//     }
+
+//     //remove attribute when attribute is not exist in new element
+//     if (originAttr && !newAttr) {
+//       $origin.removeAttribute(attrName);
+//       continue;
+//     }
+//   }
 };
 
-const getAttNameList = (attributes: NamedNodeMap): string[] => {
-  if (!attributes) {
-    return [];
-  }
+const replaceChildren = ($origin: WoowactElement, $new: WoowactElement): void => {
+  const max = Math.max($origin?.children.length || 0, $new?.children?.length || 0);
 
-  const attributeList: string[] = [];
-
-  Array.prototype.forEach.call(attributes, (attr: Attr) => {
-    attributeList.push(attr.nodeName);
-  });
-
-  return attributeList;
-};
-
-const replaceAttributes = ($origin: HTMLElement, $new: HTMLElement): void => {
-  const attrNames: string[] = Array.from(
-    new Set([
-      ...getAttNameList($origin.attributes),
-      ...getAttNameList($new.attributes),
-    ]),
-  );
-
-  for (const attrName of attrNames) {
-    const originAttr: string | null = $origin.getAttribute(attrName);
-    const newAttr: string | null = $new.getAttribute(attrName);
-
-    //add attribute when attribute is not exist in old element
-    //replace attribute when attributes are differnet
-    if (newAttr && (!originAttr || originAttr !== newAttr)) {
-      $origin.setAttribute(attrName, newAttr);
-      continue;
-    }
-
-    //remove attribute when attribute is not exist in new element
-    if (originAttr && !newAttr) {
-      $origin.removeAttribute(attrName);
-      continue;
-    }
-  }
-};
-
-const replaceNodeValue = ($origin: HTMLElement, $new: HTMLElement): void => {
-  if ($origin.nodeValue !== $new.nodeValue) {
-    $origin.nodeValue = $new.nodeValue;
-  }
-};
-
-const replaceChildren = ($origin: HTMLElement, $new: HTMLElement): void => {
-  if ($origin.tagName === 'UL' || $origin.tagName === 'OL') {
-    replaceByKeys($origin, $new);
-    return;
-  }
-
-  replaceStartToEnd($origin, $new);
-};
-
-const getKeyNodes = ($element: HTMLElement): { [key: number]: Element } => {
-  const keyNodes: TKeyElement = {};
-  Array.from($element.children).forEach(child => {
-    const key: string | null = (child as HTMLElement).getAttribute('key');
-
-    if (!key) {
-      console.error('child component must have key');
+  getArrayN(max).forEach(i => {
+    const $originChild = $origin?.children[i];
+    const $newChild = $new?.children[i];
+    if (!$originChild) {
       return;
     }
-
-    keyNodes[key] = child as HTMLElement;
-  });
-  return keyNodes;
-};
-
-const replaceByKeys = ($origin: HTMLElement, $new: HTMLElement) => {
-  const $originKeyNodes: TKeyElement = getKeyNodes($origin);
-  const newKeyArray = Array.from($new.children);
-
-  $origin.innerHTML = '';
-
-  newKeyArray.forEach(child => {
-    const key: string | null = (child as HTMLElement).getAttribute('key');
-
-    if (!key) {
-      console.error('child component must have key');
+    if (!$newChild) {
       return;
     }
-
-    if ($originKeyNodes[key]) {
-      $origin.appendChild($originKeyNodes[key]);
-    } else {
-      $origin.appendChild(child);
-    }
-  });
-};
-
-const replaceStartToEnd = ($origin: HTMLElement, $new: HTMLElement) => {
-  const $originChildren = Array.from($origin.childNodes);
-  const $newChildren = Array.from($new.childNodes);
-
-  const max = Math.max($originChildren.length, $newChildren.length);
-
-  getArrayN(max).forEach((i: number) => {
-    const $originChild = $originChildren[i];
-    const $newChild = $newChildren[i];
-
-    if ($originChild && !$newChild) {
-      $originChild.remove();
-      return;
-    }
-
-    if (!$originChild && $newChild) {
-      $origin.appendChild($newChild);
-      return;
-    }
-
-    reconciliation(
-      $originChildren[i] as HTMLElement,
-      $newChildren[i] as HTMLElement,
-    );
   });
 };
 
@@ -133,10 +54,13 @@ const replaceStartToEnd = ($origin: HTMLElement, $new: HTMLElement) => {
  * @param $new (new node)
  * @returns $replacedElement
  */
-const reconciliation = (
-  $origin: HTMLElement,
-  $new: HTMLElement,
-): HTMLElement => {
+export const reconciliation = (
+  $origin: WoowactElement,
+  $new: WoowactElement,
+): WoowactElement => {
+  if (!$origin || !$new) {
+    return $origin;
+  }
   /**
     엘리먼트의 타입이 다른 경우
 
@@ -146,9 +70,10 @@ const reconciliation = (
 
     루트 엘리먼트 아래의 모든 컴포넌트도 언마운트되고 그 state도 사라집니다. 예를 들어, 아래와 같은 비교가 일어나면,
   **/
-  if ($origin.tagName !== $new.tagName) {
-    $origin.replaceWith($new);
-    $origin.remove();
+  if ($origin?.tag !== $new?.tag) {
+    //$origin.unmount();
+    const $el = changeToHTMLElement($new);
+    $el && ($origin.$el as HTMLElement).replaceWith($el);
     return $new;
   }
 
@@ -156,8 +81,6 @@ const reconciliation = (
    * Check attributes and replace it
    */
   replaceAttributes($origin, $new);
-
-  replaceNodeValue($origin, $new);
 
   replaceChildren($origin, $new);
 
