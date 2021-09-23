@@ -4,10 +4,12 @@ import { WoowactNode } from '../lib/woowact/core/VDOM';
 export const ComponentB = (): WoowactNode => {
   const [num, setNum] = Woowact.useState<number>(0);
   const [count, setCount] = Woowact.useState<boolean>(false);
-
-  count && setTimeout(() => {count && setNum(num + 1)}, 300);
+  const timer = setTimeout(() => {count && setNum(num + 1)}, 500);
 
   const handleClick = () => {
+    if (count) {
+      clearTimeout(timer);
+    }
     setCount(!count);
   }
   
