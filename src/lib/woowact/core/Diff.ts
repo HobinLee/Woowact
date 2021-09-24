@@ -36,12 +36,23 @@ const replaceChildren = ($origin: WoowactElement, $new: WoowactElement): void =>
   getArrayN(max).forEach(i => {
     const $originChild = $origin?.children[i];
     const $newChild = $new?.children[i];
-    if (!$originChild) {
+    
+    if($originChild && !$newChild) {
+      //origin Child 지우기
+      //$originChild.remove();
       return;
     }
-    if (!$newChild) {
+
+    if (!$originChild && $newChild) {
+      //origin에 추가하기
+      //$origin.appendChild($newChild);
       return;
     }
+
+    reconciliation(
+      $origin?.children[i] as WoowactElement,
+      $new?.children[i] as WoowactElement,
+    );
   });
 };
 
