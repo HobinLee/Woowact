@@ -35,10 +35,11 @@ export const createElement = (renderTemplate: string, components?: {
 
 type EventHandler = (e: Event | null) => void;
 
-type AttributeKey = string;
 type AttributeValue = string | EventHandler;
 
-export type Attributes = Map<AttributeKey, AttributeValue>;
+export type Attributes = {
+  [key: string]: AttributeValue
+};
 
 export const renderDOM = (nodeName: string, $el: HTMLElement | null) => {
   try {
@@ -103,14 +104,17 @@ const createHTMLElement = ($woowactElement: WoowactElement): HTMLElement | undef
 
   const $htmlElement: HTMLElement = document.createElement($woowactElement?.tag);
 
-  $woowactElement.attributes?.forEach((value, key) => {
+  const attrs: Attributes = $woowactElement.attributes ?? {};
+  for(const key in attrs) {
+    const value: AttributeValue = attrs[key];
+
     if(typeof value === 'string') {
       $htmlElement.setAttribute(key, value);
       return;
     }
     const event = checkEventHandler(key);
     event && ($htmlElement[event] = value);
-  })
+  }
 
   $woowactElement.children?.forEach($woowactNode => {
     const $node = changeToHTMLElement($woowactNode);
