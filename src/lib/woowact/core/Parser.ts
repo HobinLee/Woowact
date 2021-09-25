@@ -103,13 +103,14 @@ const parseAttributes = (tag: string): Attributes | undefined => {
   
   if (!attributes) return;
 
-  let attributeMap = new Map<string, string>();
+  let attributeMap: Attributes = {};
+
   attributes.forEach((attribute) => {
-    const newAttr = parseAttribute(attribute);
+    const newAttr: Attribute | undefined = parseAttribute(attribute);
     
     if (!newAttr) return;
 
-    attributeMap.set(newAttr.key, newAttr.value);
+    attributeMap[newAttr.key] = newAttr.value;
   });
 
   return attributeMap;

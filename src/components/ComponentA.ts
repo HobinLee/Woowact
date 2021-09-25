@@ -16,7 +16,9 @@ export const ComponentA = (initValue: number): WoowactNode => {
       }, {
         tag: 'button',
         children: ['+'],
-        attributes: new Map().set('onclick', handleClick)
+        attributes: {
+          'onclick': handleClick
+        }
       }
     ]
   }

@@ -21,7 +21,9 @@ export const ComponentB = (): WoowactNode => {
       }, {
         tag: 'button',
         children: [(count ? 'stop' : 'start')],
-        attributes: new Map().set('onclick', handleClick)
+        attributes: {
+          'onclick': handleClick
+        }
       }
     ]
   }
