@@ -5,6 +5,7 @@ export const ComponentA = (initValue: number): WoowactNode => {
   const [count, setCount] = Woowact.useState<number>(initValue);
 
   const handleClick = () => {
+    alert(count);
     setCount(count + 1);
   }
   
@@ -12,7 +13,7 @@ export const ComponentA = (initValue: number): WoowactNode => {
     tag: 'div',
     children: [{
         tag: 'h3',
-        children: [count.toString()]
+        children: [count.toString()],
       }, {
         tag: 'button',
         children: ['+'],
@@ -20,6 +21,8 @@ export const ComponentA = (initValue: number): WoowactNode => {
           'onclick': handleClick
         }
       }
-    ]
+    ], attributes: {
+      'attA': count.toString()
+    }
   }
 }

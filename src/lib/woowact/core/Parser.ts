@@ -46,9 +46,7 @@ export const parseJSX = (markup: string): WoowactElement | undefined => {
 
     const controlCloseTag = (tagName: string) => {
       if (checkSelfCloseTag(tagName)) {
-        //console.log(tagName.replace('/', ''), getLastTag()?.tag);
         //닫는 태그가 열려있는 태그와 일치하는지 확인하기!
-
         if (tagName.replace('/', '') !== getLastTag()?.tag) {
           throw new Error(`클로징 태그가 없습니다. ${getLastTag()?.tag}`);
         }
@@ -78,9 +76,6 @@ export const parseJSX = (markup: string): WoowactElement | undefined => {
 
       tagName && controlCloseTag(tagName);
     });
-
-
-    console.log(htmlStack);
 
     return htmlStack[0];
   } catch (e) {
