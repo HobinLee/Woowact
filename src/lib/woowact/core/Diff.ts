@@ -29,7 +29,7 @@ const replaceAttributes = ($origin: WoowactElement, $new: WoowactElement): void 
     }
 
     //create or change new attr
-    if(!originAttr[key] && attr) {
+    if (attr) {
       originAttr[key] = attr;
 
       if (typeof attr === 'string') {
@@ -39,15 +39,6 @@ const replaceAttributes = ($origin: WoowactElement, $new: WoowactElement): void 
         event && ($element[event] = attr);
       }
       return;
-    }
-
-    originAttr[key] = attr;
-
-    if (typeof attr === 'string') {
-      $element.setAttribute(key, attr);
-    } else {
-      const event = checkEventHandler(key);
-      event && ($element[event] = attr);
     }
   })
 };
@@ -66,15 +57,16 @@ const replaceChildren = ($origin: WoowactElement, $new: WoowactElement): void =>
     
     if(!$newChild) {
       //origin Child 지우기
-      //$origin?.$el?.removeChild();
-      //$originChild.remove();
+      delete $originChildren[i];
+      $origin?.$el?.removeChild($childNodes[i]);
       return;
     }
 
     if (!$originChild) {
-      //origin에 추가하기
-      //$origin.appendChild($newChild);
-      return;
+      $originChildren[i] = $newChild;
+      const $newElement = changeToHTMLElement($newChild);
+
+      $newElement && $origin?.$el?.appendChild($newElement);
     }
 
     reconciliation(
