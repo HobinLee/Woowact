@@ -1,7 +1,7 @@
 import { Woowact } from '../lib/woowact/core/Hooks';
-import { WoowactNode } from '../lib/woowact/core/VDOM';
+import { WoowactElement } from '../lib/woowact/core/VDOM';
 
-export const ComponentB = (): WoowactNode => {
+export const ComponentB = (): WoowactElement => {
   const [num, setNum] = Woowact.useState<number>(0);
   const [count, setCount] = Woowact.useState<boolean>(false);
   const timer = setTimeout(() => {count && setNum(num + 1)}, 500);

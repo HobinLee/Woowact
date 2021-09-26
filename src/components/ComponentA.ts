@@ -1,14 +1,19 @@
 import { Woowact } from '../lib/woowact/core/Hooks';
-import { WoowactNode } from '../lib/woowact/core/VDOM';
+import { WoowactElement, WoowactNode } from '../lib/woowact/core/VDOM';
 
-export const ComponentA = (initValue: number): WoowactNode => {
+export const ComponentA = (initValue: number): WoowactElement => {
   const [count, setCount] = Woowact.useState<number>(initValue);
 
   const handleClick = () => {
     setCount(count + 1);
   }
 
-  const list = Array.from({length: count + 1}).map((v, i) => i.toString() + ' ');
+  const list = Array.from({length: 11 - count}).map((v, i): WoowactNode => {
+    return {
+      tag: 'span',
+      children: [i.toString() + ' ']
+    }
+  });
   
   return {
     tag: 'div',
