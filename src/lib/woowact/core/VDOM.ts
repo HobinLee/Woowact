@@ -1,4 +1,5 @@
 import Component from "./Component";
+import { reconciliation } from "./Diff";
 import { getTagName, parseJSX } from "./Parser";
 
 type Key = string | number;
@@ -34,10 +35,11 @@ export const createElement = (renderTemplate: string, components?: {
 
 type EventHandler = (e: Event | null) => void;
 
-type AttributeKey = string;
-type AttributeValue = string | EventHandler;
+export type AttributeValue = string | EventHandler;
 
-export type Attributes = Map<AttributeKey, AttributeValue>;
+export type Attributes = {
+  [key: string]: AttributeValue
+};
 
 export const renderDOM = (nodeName: string, $el: HTMLElement | null) => {
   try {
@@ -55,16 +57,10 @@ export const renderDOM = (nodeName: string, $el: HTMLElement | null) => {
   }
 }
 
-export const reconciliation = ($old: WoowactElement, $new: WoowactElement): WoowactElement => {
+export const updateRender = ($old: WoowactElement, $new: WoowactElement): WoowactElement => {
   if (!$new) return $old;
-
-  const $componentElement = changeToHTMLElement($new);
-    
-  if (!$old?.$el || !$componentElement) return $old;
-
-  $new.$el = $componentElement;
-
-  ($old.$el as HTMLElement).replaceWith($componentElement);
+  
+  $new = reconciliation($old, $new);
 
   return $new;
 }
@@ -80,8 +76,6 @@ export const renderWoowactElement = (node: WoowactElement, $el: HTMLElement | nu
     
     if (!$componentElement) return;
 
-    node.$el = $componentElement;
-
     $componentElement && $el.appendChild($componentElement);
   } catch(e) {
     console.error(e);
@@ -89,7 +83,7 @@ export const renderWoowactElement = (node: WoowactElement, $el: HTMLElement | nu
   }
 }
 
-const changeToHTMLElement = ($woowactNode: WoowactNode): Node | undefined => {
+export const changeToHTMLElement = ($woowactNode: WoowactNode): Node | undefined => {
   if (!$woowactNode) return;
 
   if (typeof $woowactNode === 'string') {
@@ -110,25 +104,31 @@ const createHTMLElement = ($woowactElement: WoowactElement): HTMLElement | undef
 
   const $htmlElement: HTMLElement = document.createElement($woowactElement?.tag);
 
-  $woowactElement.attributes?.forEach((value, key) => {
-    if(typeof value === 'string') {
+  const attrs: Attributes = $woowactElement.attributes ?? {};
+
+  for(const key in attrs) {
+    const value: AttributeValue = attrs[key];
+
+    if (typeof value === 'string') {
       $htmlElement.setAttribute(key, value);
-      return;
+    } else {
+      const event = checkEventHandler(key);
+      event && ($htmlElement[event] = value);
     }
-    const event = checkEventHandler(key);
-    event && ($htmlElement[event] = value);
-  })
+  }
 
   $woowactElement.children?.forEach($woowactNode => {
     const $node = changeToHTMLElement($woowactNode);
     $node && $htmlElement.appendChild($node);
   })
 
+  $woowactElement.$el = $htmlElement;
+
   return $htmlElement;
 }
 
 
-const checkEventHandler = (attr: string): Events | null => {
+export const checkEventHandler = (attr: string): Events | null => {
   if(attr === 'onclick' ||
   attr === 'onmousemove' ||
   attr === 'onchange' ||

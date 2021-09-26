@@ -1,125 +1,109 @@
+import { EWOULDBLOCK } from 'constants';
 import { getArrayN } from '../../../utils/array';
+import { $ } from '../../../utils/selector';
+import { WoowactElement, changeToHTMLElement, WoowactNode, Attributes, AttributeValue, checkEventHandler, WoowactText } from './VDOM';
 
-type TKeyElement = {
-  [key: string]: Element;
-};
+const replaceAttributes = ($origin: WoowactElement, $new: WoowactElement): void => {
+  const originAttr: Attributes = $origin?.attributes ?? {};
+  const newAttr: Attributes = $new?.attributes ?? {};
 
-const getAttNameList = (attributes: NamedNodeMap): string[] => {
-  if (!attributes) {
-    return [];
-  }
+  const keys: string[] = [...Object.keys(originAttr), ...Object.keys(newAttr)];
+  const $element: HTMLElement | null = $origin?.$el as HTMLElement || null;
 
-  const attributeList: string[] = [];
+  if (!$element) return;  
 
-  Array.prototype.forEach.call(attributes, (attr: Attr) => {
-    attributeList.push(attr.nodeName);
-  });
+  keys.forEach(key => {
+    const attr: AttributeValue | undefined = newAttr[key];
 
-  return attributeList;
-};
+    if (attr === originAttr[key]) return;
+    
+    //delete origin attr
+    if(originAttr[key] && !attr) {
+      delete originAttr[key];
 
-const replaceAttributes = ($origin: HTMLElement, $new: HTMLElement): void => {
-  const attrNames: string[] = Array.from(
-    new Set([
-      ...getAttNameList($origin.attributes),
-      ...getAttNameList($new.attributes),
-    ]),
-  );
-
-  for (const attrName of attrNames) {
-    const originAttr: string | null = $origin.getAttribute(attrName);
-    const newAttr: string | null = $new.getAttribute(attrName);
-
-    //add attribute when attribute is not exist in old element
-    //replace attribute when attributes are differnet
-    if (newAttr && (!originAttr || originAttr !== newAttr)) {
-      $origin.setAttribute(attrName, newAttr);
-      continue;
-    }
-
-    //remove attribute when attribute is not exist in new element
-    if (originAttr && !newAttr) {
-      $origin.removeAttribute(attrName);
-      continue;
-    }
-  }
-};
-
-const replaceNodeValue = ($origin: HTMLElement, $new: HTMLElement): void => {
-  if ($origin.nodeValue !== $new.nodeValue) {
-    $origin.nodeValue = $new.nodeValue;
-  }
-};
-
-const replaceChildren = ($origin: HTMLElement, $new: HTMLElement): void => {
-  if ($origin.tagName === 'UL' || $origin.tagName === 'OL') {
-    replaceByKeys($origin, $new);
-    return;
-  }
-
-  replaceStartToEnd($origin, $new);
-};
-
-const getKeyNodes = ($element: HTMLElement): { [key: number]: Element } => {
-  const keyNodes: TKeyElement = {};
-  Array.from($element.children).forEach(child => {
-    const key: string | null = (child as HTMLElement).getAttribute('key');
-
-    if (!key) {
-      console.error('child component must have key');
+      if (typeof attr === 'string') {
+        $element.removeAttribute(key);
+      } else {
+        const event = checkEventHandler(key);
+        event && (delete $element[event]);
+      }
       return;
     }
 
-    keyNodes[key] = child as HTMLElement;
-  });
-  return keyNodes;
-};
+    //create or change new attr
+    if (attr) {
+      originAttr[key] = attr;
 
-const replaceByKeys = ($origin: HTMLElement, $new: HTMLElement) => {
-  const $originKeyNodes: TKeyElement = getKeyNodes($origin);
-  const newKeyArray = Array.from($new.children);
-
-  $origin.innerHTML = '';
-
-  newKeyArray.forEach(child => {
-    const key: string | null = (child as HTMLElement).getAttribute('key');
-
-    if (!key) {
-      console.error('child component must have key');
+      if (typeof attr === 'string') {
+        $element.setAttribute(key, attr);
+      } else {
+        const event = checkEventHandler(key);
+        event && ($element[event] = attr);
+      }
       return;
     }
-
-    if ($originKeyNodes[key]) {
-      $origin.appendChild($originKeyNodes[key]);
-    } else {
-      $origin.appendChild(child);
-    }
-  });
+  })
 };
 
-const replaceStartToEnd = ($origin: HTMLElement, $new: HTMLElement) => {
-  const $originChildren = Array.from($origin.childNodes);
-  const $newChildren = Array.from($new.childNodes);
+const replaceChildren = ($origin: WoowactElement, $new: WoowactElement): void => {
+  const $originChildren: WoowactNode[] = $origin?.children ?? [];
+  const $newChildren: WoowactNode[] = $new?.children ?? [];
+  const $childNodes: Node[] = Array.from($origin?.$el?.childNodes ?? []);
 
-  const max = Math.max($originChildren.length, $newChildren.length);
-
+  const max = $originChildren.length > $newChildren.length 
+                ? $originChildren.length : $newChildren.length;
+  
   getArrayN(max).forEach((i: number) => {
-    const $originChild = $originChildren[i];
-    const $newChild = $newChildren[i];
-
-    if ($originChild && !$newChild) {
-      $originChild.remove();
+    const $originChild: WoowactNode = $originChildren[i];
+    const $newChild: WoowactNode = $newChildren[i];
+    
+    if(!$newChild) {
+      $originChildren.pop();
+      $origin?.$el?.removeChild($childNodes[i]);
       return;
     }
 
-    if (!$originChild && $newChild) {
-      $origin.appendChild($newChild);
+    if (!$originChild) {
+      $originChildren[i] = $newChild;
+      const $newElement = changeToHTMLElement($newChild);
+
+      $newElement && $origin?.$el?.appendChild($newElement);
+      return;
+    }
+
+    // 기존 node가 text일 때
+    if (typeof $originChild === 'string' || typeof $originChild === 'number') {
+      // 새 node 역시 text라면
+      if (typeof $newChild === 'string' || typeof $newChild === 'number') {
+        if ($newChild.toString() !== $originChild.toString() && $childNodes[i]) {
+          $childNodes[i].nodeValue = $newChild.toString();
+          $originChildren[i] = $newChild;
+        }
+        return;
+      } else {
+        const $node: Node = $childNodes[i];
+        const $el: Node | undefined = changeToHTMLElement($newChild);
+        $originChildren[i] = $newChild;
+        $el && $origin?.$el?.replaceChild($node, $el);
+        ($node as HTMLElement).remove();
+        return;
+      }
+    }
+
+    // 새 node가 text일 때
+    if (typeof $newChild === 'string' || typeof $newChild === 'number') {
+      const $node: Node = $childNodes[i];
+      const $el: Node | undefined = changeToHTMLElement($newChild);
+
+      $originChildren[i] = $newChild;
+      $el && $origin?.$el?.replaceChild($node, $el);
+      ($node as HTMLElement).remove();
       return;
     }
 
     reconciliation(
-      $originChildren[i] as HTMLElement,
-      $newChildren[i] as HTMLElement,
+      $originChild,
+      $newChild,
     );
   });
 };
@@ -133,31 +117,43 @@ const replaceStartToEnd = ($origin: HTMLElement, $new: HTMLElement) => {
  * @param $new (new node)
  * @returns $replacedElement
  */
-const reconciliation = (
-  $origin: HTMLElement,
-  $new: HTMLElement,
-): HTMLElement => {
-  /**
-    엘리먼트의 타입이 다른 경우
 
-    두 루트 엘리먼트의 타입이 다르면, React는 이전 트리를 버리고 완전히 새로운 트리를 구축합니다. <a>에서 <img>로, <Article>에서 <Comment>로, 혹은 <Button>에서 <div>로 바뀌는 것 모두 트리 전체를 재구축하는 경우입니다.
+export const reconciliation = (
+  $origin: WoowactElement,
+  $new: WoowactElement,
+): WoowactElement => {
+  if (!$origin || !$new) {
+    return $origin;
+  }
+  if (!$new) {
+    //$origin unmount
+    ($origin?.$el as HTMLElement).remove();
+    return null;
+  }
+
+  if (!$origin) {
+    $new.$el = changeToHTMLElement($new);
+    return $new;
+  }
+  /**
+    노드의 타입이 다른 경우
+
+    두 노드의 타입이 다르면, React는 이전 트리를 버리고 완전히 새로운 트리를 구축합니다. <a>에서 <img>로, <Article>에서 <Comment>로, 혹은 <Button>에서 <div>로 바뀌는 것 모두 트리 전체를 재구축하는 경우입니다.
 
     트리를 버릴 때 이전 DOM 노드들은 모두 파괴됩니다. 컴포넌트 인스턴스는 componentWillUnmount()가 실행됩니다. 새로운 트리가 만들어질 때, 새로운 DOM 노드들이 DOM에 삽입됩니다. 그에 따라 컴포넌트 인스턴스는 UNSAFE_componentWillMount()가 실행되고 componentDidMount()가 이어서 실행됩니다. 이전 트리와 연관된 모든 state는 사라집니다.
 
     루트 엘리먼트 아래의 모든 컴포넌트도 언마운트되고 그 state도 사라집니다. 예를 들어, 아래와 같은 비교가 일어나면,
   **/
-  if ($origin.tagName !== $new.tagName) {
-    $origin.replaceWith($new);
-    $origin.remove();
+  if ($origin?.tag !== $new?.tag) {
+    //$origin.unmount();
+    const $el = changeToHTMLElement($new);
+
+    $el && ($origin.$el as HTMLElement).replaceWith($el);
+    
     return $new;
   }
 
-  /*
-   * Check attributes and replace it
-   */
   replaceAttributes($origin, $new);
-
-  replaceNodeValue($origin, $new);
 
   replaceChildren($origin, $new);
 

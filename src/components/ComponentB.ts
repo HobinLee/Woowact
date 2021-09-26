@@ -1,12 +1,30 @@
-import { createElement, WoowactNode } from '../lib/woowact/core/VDOM';
-import { getArrayN } from '../utils/array';
+import { Woowact } from '../lib/woowact/core/Hooks';
+import { WoowactElement } from '../lib/woowact/core/VDOM';
 
-export const ComponentB = (length: number): WoowactNode => {
- 
-  const generateList = getArrayN(length).map(i => `<li key =${i}>${i}</li>`).join('');
+export const ComponentB = (): WoowactElement => {
+  const [num, setNum] = Woowact.useState<number>(0);
+  const [count, setCount] = Woowact.useState<boolean>(false);
+  const timer = setTimeout(() => {count && setNum(num + 1)}, 500);
+
+  const handleClick = () => {
+    if (count) {
+      clearTimeout(timer);
+    }
+    setCount(!count);
+  }
   
-  return createElement(`<div>
-    <h3>ComponentB</h3>
-    ${generateList}
-  </div>`);
+  return {
+    tag: 'div',
+    children: [{
+        tag: 'h3',
+        children: [num.toString()]
+      }, {
+        tag: 'button',
+        children: [(count ? 'stop' : 'start')],
+        attributes: {
+          'onclick': handleClick
+        }
+      }
+    ]
+  }
 }
