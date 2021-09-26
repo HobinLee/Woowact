@@ -1,38 +1,48 @@
 import { getArrayN } from '../../../utils/array';
-import { WoowactElement, changeToHTMLElement } from './VDOM';
+import { WoowactElement, changeToHTMLElement, WoowactNode, Attributes, AttributeValue, checkEventHandler } from './VDOM';
 
 const replaceAttributes = ($origin: WoowactElement, $new: WoowactElement): void => {
-//   const originAttr: string[] = $origin?.attributes. ?? [];
-//   const newAttr: st
-//   const attrNames: string[] = Array.from(
-//     new Set([
-//       ...$origin?.attributes,
-//       ...$new?.attributes,
-//     ]),
-//   );
+  const originAttr: Attributes = $origin?.attributes ?? {};
+  const newAttr: Attributes = $new?.attributes ?? {};
 
-//   for (const attrName of attrNames) {
-//     const originAttr: string | null = $origin.getAttribute(attrName);
-//     const newAttr: string | null = $new.getAttribute(attrName);
+  const keys: string[] = [...Object.keys(originAttr), ...Object.keys(newAttr)];
+  const $element: HTMLElement | null = $origin?.$el as HTMLElement || null;
 
-//     //add attribute when attribute is not exist in old element
-//     //replace attribute when attributes are differnet
-//     if (newAttr && (!originAttr || originAttr !== newAttr)) {
-//       $origin.setAttribute(attrName, newAttr);
-//       continue;
-//     }
+  if (!$element) return;  
 
-//     //remove attribute when attribute is not exist in new element
-//     if (originAttr && !newAttr) {
-//       $origin.removeAttribute(attrName);
-//       continue;
-//     }
-//   }
+  keys.forEach(key => {
+    const attr: AttributeValue | undefined = newAttr[key];
+    
+    //delete origin attr
+    if(originAttr[key] && !attr) {
+      delete originAttr[key];
+
+      if (typeof attr === 'string') {
+        $element.removeAttribute(key);
+      } else {
+        const event = checkEventHandler(key);
+        event && (delete $element[event]);
+      }
+      return;
+    }
+    //create or change new attr
+    if(attr) {
+      originAttr[key] = attr;
+
+      if (typeof attr === 'string') {
+        $element.setAttribute(key, attr);
+      } else {
+        const event = checkEventHandler(key);
+        event && ($element[event] = attr);
+      }
+      return;
+    }
+  })
 };
 
 const replaceChildren = ($origin: WoowactElement, $new: WoowactElement): void => {
   const max = Math.max($origin?.children.length || 0, $new?.children?.length || 0);
-
+  
   getArrayN(max).forEach(i => {
     const $originChild = $origin?.children[i];
     const $newChild = $new?.children[i];

@@ -35,7 +35,7 @@ export const createElement = (renderTemplate: string, components?: {
 
 type EventHandler = (e: Event | null) => void;
 
-type AttributeValue = string | EventHandler;
+export type AttributeValue = string | EventHandler;
 
 export type Attributes = {
   [key: string]: AttributeValue
@@ -127,7 +127,7 @@ const createHTMLElement = ($woowactElement: WoowactElement): HTMLElement | undef
 }
 
 
-const checkEventHandler = (attr: string): Events | null => {
+export const checkEventHandler = (attr: string): Events | null => {
   if(attr === 'onclick' ||
   attr === 'onmousemove' ||
   attr === 'onchange' ||
