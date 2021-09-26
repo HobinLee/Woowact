@@ -1,5 +1,7 @@
+import { EWOULDBLOCK } from 'constants';
 import { getArrayN } from '../../../utils/array';
-import { WoowactElement, changeToHTMLElement, WoowactNode, Attributes, AttributeValue, checkEventHandler } from './VDOM';
+import { $ } from '../../../utils/selector';
+import { WoowactElement, changeToHTMLElement, WoowactNode, Attributes, AttributeValue, checkEventHandler, WoowactText } from './VDOM';
 
 const replaceAttributes = ($origin: WoowactElement, $new: WoowactElement): void => {
   const originAttr: Attributes = $origin?.attributes ?? {};
@@ -51,13 +53,12 @@ const replaceChildren = ($origin: WoowactElement, $new: WoowactElement): void =>
   const max = $originChildren.length > $newChildren.length 
                 ? $originChildren.length : $newChildren.length;
   
-  getArrayN(max).forEach(i => {
+  getArrayN(max).forEach((i: number) => {
     const $originChild: WoowactNode = $originChildren[i];
     const $newChild: WoowactNode = $newChildren[i];
     
     if(!$newChild) {
-      //origin Child 지우기
-      delete $originChildren[i];
+      $originChildren.pop();
       $origin?.$el?.removeChild($childNodes[i]);
       return;
     }
@@ -67,11 +68,42 @@ const replaceChildren = ($origin: WoowactElement, $new: WoowactElement): void =>
       const $newElement = changeToHTMLElement($newChild);
 
       $newElement && $origin?.$el?.appendChild($newElement);
+      return;
+    }
+
+    // 기존 node가 text일 때
+    if (typeof $originChild === 'string' || typeof $originChild === 'number') {
+      // 새 node 역시 text라면
+      if (typeof $newChild === 'string' || typeof $newChild === 'number') {
+        if ($newChild.toString() !== $originChild.toString() && $childNodes[i]) {
+          $childNodes[i].nodeValue = $newChild.toString();
+          $originChildren[i] = $newChild;
+        }
+        return;
+      } else {
+        const $node: Node = $childNodes[i];
+        const $el: Node | undefined = changeToHTMLElement($newChild);
+        $originChildren[i] = $newChild;
+        $el && $origin?.$el?.replaceChild($node, $el);
+        ($node as HTMLElement).remove();
+        return;
+      }
+    }
+
+    // 새 node가 text일 때
+    if (typeof $newChild === 'string' || typeof $newChild === 'number') {
+      const $node: Node = $childNodes[i];
+      const $el: Node | undefined = changeToHTMLElement($newChild);
+
+      $originChildren[i] = $newChild;
+      $el && $origin?.$el?.replaceChild($node, $el);
+      ($node as HTMLElement).remove();
+      return;
     }
 
     reconciliation(
-      $origin?.children[i] as WoowactElement,
-      $new?.children[i] as WoowactElement,
+      $originChild,
+      $newChild,
     );
   });
 };
@@ -85,6 +117,7 @@ const replaceChildren = ($origin: WoowactElement, $new: WoowactElement): void =>
  * @param $new (new node)
  * @returns $replacedElement
  */
+
 export const reconciliation = (
   $origin: WoowactElement,
   $new: WoowactElement,
@@ -92,10 +125,20 @@ export const reconciliation = (
   if (!$origin || !$new) {
     return $origin;
   }
-  /**
-    엘리먼트의 타입이 다른 경우
+  if (!$new) {
+    //$origin unmount
+    ($origin?.$el as HTMLElement).remove();
+    return null;
+  }
 
-    두 루트 엘리먼트의 타입이 다르면, React는 이전 트리를 버리고 완전히 새로운 트리를 구축합니다. <a>에서 <img>로, <Article>에서 <Comment>로, 혹은 <Button>에서 <div>로 바뀌는 것 모두 트리 전체를 재구축하는 경우입니다.
+  if (!$origin) {
+    $new.$el = changeToHTMLElement($new);
+    return $new;
+  }
+  /**
+    노드의 타입이 다른 경우
+
+    두 노드의 타입이 다르면, React는 이전 트리를 버리고 완전히 새로운 트리를 구축합니다. <a>에서 <img>로, <Article>에서 <Comment>로, 혹은 <Button>에서 <div>로 바뀌는 것 모두 트리 전체를 재구축하는 경우입니다.
 
     트리를 버릴 때 이전 DOM 노드들은 모두 파괴됩니다. 컴포넌트 인스턴스는 componentWillUnmount()가 실행됩니다. 새로운 트리가 만들어질 때, 새로운 DOM 노드들이 DOM에 삽입됩니다. 그에 따라 컴포넌트 인스턴스는 UNSAFE_componentWillMount()가 실행되고 componentDidMount()가 이어서 실행됩니다. 이전 트리와 연관된 모든 state는 사라집니다.
 
@@ -104,13 +147,12 @@ export const reconciliation = (
   if ($origin?.tag !== $new?.tag) {
     //$origin.unmount();
     const $el = changeToHTMLElement($new);
+
     $el && ($origin.$el as HTMLElement).replaceWith($el);
+    
     return $new;
   }
 
-  /*
-   * Check attributes and replace it
-   */
   replaceAttributes($origin, $new);
 
   replaceChildren($origin, $new);

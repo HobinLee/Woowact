@@ -7,7 +7,7 @@ export const App = (): WoowactElement => {
     tag: 'div',
     children: [
       ComponentA(0),
-      ComponentA(100),
+      ComponentA(10),
       ComponentB(),
     ]
   }
