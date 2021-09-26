@@ -105,15 +105,16 @@ const createHTMLElement = ($woowactElement: WoowactElement): HTMLElement | undef
   const $htmlElement: HTMLElement = document.createElement($woowactElement?.tag);
 
   const attrs: Attributes = $woowactElement.attributes ?? {};
+
   for(const key in attrs) {
     const value: AttributeValue = attrs[key];
 
-    if(typeof value === 'string') {
+    if (typeof value === 'string') {
       $htmlElement.setAttribute(key, value);
-      return;
+    } else {
+      const event = checkEventHandler(key);
+      event && ($htmlElement[event] = value);
     }
-    const event = checkEventHandler(key);
-    event && ($htmlElement[event] = value);
   }
 
   $woowactElement.children?.forEach($woowactNode => {

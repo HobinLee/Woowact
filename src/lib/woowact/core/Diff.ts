@@ -12,6 +12,8 @@ const replaceAttributes = ($origin: WoowactElement, $new: WoowactElement): void 
 
   keys.forEach(key => {
     const attr: AttributeValue | undefined = newAttr[key];
+
+    if (attr === originAttr[key]) return;
     
     //delete origin attr
     if(originAttr[key] && !attr) {
@@ -25,8 +27,9 @@ const replaceAttributes = ($origin: WoowactElement, $new: WoowactElement): void 
       }
       return;
     }
+
     //create or change new attr
-    if(attr) {
+    if(!originAttr[key] && attr) {
       originAttr[key] = attr;
 
       if (typeof attr === 'string') {
@@ -37,23 +40,38 @@ const replaceAttributes = ($origin: WoowactElement, $new: WoowactElement): void 
       }
       return;
     }
+
+    originAttr[key] = attr;
+
+    if (typeof attr === 'string') {
+      $element.setAttribute(key, attr);
+    } else {
+      const event = checkEventHandler(key);
+      event && ($element[event] = attr);
+    }
   })
 };
 
 const replaceChildren = ($origin: WoowactElement, $new: WoowactElement): void => {
-  const max = Math.max($origin?.children.length || 0, $new?.children?.length || 0);
+  const $originChildren: WoowactNode[] = $origin?.children ?? [];
+  const $newChildren: WoowactNode[] = $new?.children ?? [];
+  const $childNodes: Node[] = Array.from($origin?.$el?.childNodes ?? []);
+
+  const max = $originChildren.length > $newChildren.length 
+                ? $originChildren.length : $newChildren.length;
   
   getArrayN(max).forEach(i => {
-    const $originChild = $origin?.children[i];
-    const $newChild = $new?.children[i];
+    const $originChild: WoowactNode = $originChildren[i];
+    const $newChild: WoowactNode = $newChildren[i];
     
-    if($originChild && !$newChild) {
+    if(!$newChild) {
       //origin Child 지우기
+      //$origin?.$el?.removeChild();
       //$originChild.remove();
       return;
     }
 
-    if (!$originChild && $newChild) {
+    if (!$originChild) {
       //origin에 추가하기
       //$origin.appendChild($newChild);
       return;
